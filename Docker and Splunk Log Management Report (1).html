@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" style=""><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker and Splunk Installation Project Report</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&amp;family=Rajdhani:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-bg: #050a14;
+        --secondary-bg: #0a1122;
+        --accent-cyan: #00d4ff;
+        --accent-green: #00ff88;
+        --text-main: #e0e6ed;
+        --text-muted: #94a3b8;
+        --card-bg: rgba(16, 24, 45, 0.7);
+        --border-color: rgba(0, 212, 255, 0.2);
+        --glow-cyan: 0 0 10px rgba(0, 212, 255, 0.5);
+        --glow-green: 0 0 10px rgba(0, 255, 136, 0.5);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: 'Rajdhani', sans-serif;
+        background-color: var(--primary-bg);
+        color: var(--text-main);
+        line-height: 1.6;
+        overflow-x: hidden;
+        background-image:
+          radial-gradient(circle at 10% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 20%),
+          radial-gradient(circle at 90% 80%, rgba(0, 255, 136, 0.05) 0%, transparent 20%);
+      }
+
+      /* Typography */
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 1px;
+        color: white;
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        text-transform: uppercase;
+        text-shadow: var(--glow-cyan);
+      }
+      h2 {
+        font-size: 1.8rem;
+        border-left: 4px solid var(--accent-cyan);
+        padding-left: 15px;
+        margin-top: 3rem;
+        color: var(--accent-cyan);
+      }
+      h3 {
+        font-size: 1.4rem;
+        color: var(--accent-green);
+        margin-top: 1.5rem;
+      }
+
+      a {
+        color: var(--accent-cyan);
+        text-decoration: none;
+        transition: 0.3s;
+      }
+      a:hover {
+        color: var(--accent-green);
+        text-shadow: var(--glow-green);
+      }
+
+      /* Layout Utilities */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Progress Bar */
+      .progress-bar-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+        width: 0%;
+        transition: width 0.2s;
+        box-shadow: 0 0 10px var(--accent-cyan);
+      }
+
+      /* Cover Page */
+      .cover-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        border-bottom: 1px solid var(--border-color);
+        padding: 40px;
+      }
+
+      .cover-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          linear-gradient(rgba(5, 10, 20, 0.8), rgba(5, 10, 20, 0.8)),
+          url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')
+            center/cover;
+        z-index: -1;
+        filter: blur(2px);
+      }
+
+      .project-badge {
+        font-size: 4rem;
+        color: var(--accent-cyan);
+        margin-bottom: 2rem;
+        animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 15px var(--accent-cyan));
+      }
+
+      .cover-title {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(90deg, #fff, var(--accent-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+      }
+
+      .institution-box {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid var(--accent-green);
+        padding: 10px 30px;
+        border-radius: 50px;
+        margin-bottom: 3rem;
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        display: inline-block;
+      }
+
+      .student-details {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+        margin: 20px 0;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 5px;
+      }
+      .detail-label {
+        color: var(--accent-cyan);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+      }
+      .detail-value {
+        color: white;
+        font-weight: 500;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+
+      .cyber-btn {
+        background: rgba(0, 212, 255, 0.1);
+        border: 1px solid var(--accent-cyan);
+        color: var(--accent-cyan);
+        padding: 12px 25px;
+        border-radius: 5px;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+
+      .cyber-btn:hover {
+        background: var(--accent-cyan);
+        color: black;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        transform: translateY(-2px);
+      }
+
+      .cyber-btn.primary {
+        background: var(--accent-green);
+        border-color: var(--accent-green);
+        color: black;
+        font-size: 1.1rem;
+        padding: 15px 40px;
+      }
+
+      .cyber-btn.primary:hover {
+        background: #fff;
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+      }
+
+      /* Content Sections */
+      .content-wrapper {
+        background: var(--secondary-bg);
+        padding: 50px 0;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--accent-cyan), transparent);
+      }
+
+      /* Terminal Styling */
+      .terminal {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 5px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        color: #00ff00;
+        margin: 15px 0;
+        position: relative;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+      }
+
+      .terminal-header {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #333;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .red {
+        background: #ff5f56;
+      }
+      .yellow {
+        background: #ffbd2e;
+      }
+      .green {
+        background: #27c93f;
+      }
+
+      .cmd::before {
+        content: '$ ';
+        color: var(--accent-cyan);
+      }
+      .comment {
+        color: #666;
+        font-style: italic;
+      }
+
+      /* Screenshot Placeholder */
+      .screenshot-box {
+        border: 2px dashed rgba(0, 212, 255, 0.3);
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        height: 250px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+        color: var(--text-muted);
+        transition: 0.3s;
+        position: relative;
+      }
+
+      .screenshot-box:hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 212, 255, 0.05);
+      }
+
+      .screenshot-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        opacity: 0.5;
+      }
+
+      /* TOC */
+      .toc-list {
+        list-style: none;
+        counter-reset: item;
+      }
+      .toc-list li {
+        margin-bottom: 10px;
+      }
+      .toc-list a {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 5px;
+        border-left: 3px solid transparent;
+      }
+      .toc-list a:hover {
+        background: rgba(0, 212, 255, 0.1);
+        border-left: 3px solid var(--accent-cyan);
+        padding-left: 15px;
+      }
+      .toc-list a::before {
+        content: counter(item) '.';
+        counter-increment: item;
+        margin-right: 10px;
+        color: var(--accent-cyan);
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+      }
+
+      /* Footer */
+      footer {
+        background: black;
+        border-top: 1px solid var(--border-color);
+        padding: 40px 0;
+        text-align: center;
+        position: relative;
+      }
+
+      .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--accent-cyan);
+        color: black;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        z-index: 100;
+        opacity: 0.8;
+        transition: 0.3s;
+      }
+      .back-to-top:hover {
+        transform: scale(1.1);
+        opacity: 1;
+        background: var(--accent-green);
+      }
+
+      /* Animations */
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      @keyframes pulse-glow {
+        0% {
+          box-shadow: 0 0 5px var(--accent-cyan);
+        }
+        50% {
+          box-shadow: 0 0 20px var(--accent-cyan);
+        }
+        100% {
+          box-shadow: 0 0 5px var(--accent-cyan);
+        }
+      }
+
+      /* Media Queries */
+      @media (max-width: 768px) {
+        .cover-title {
+          font-size: 2rem;
+        }
+        .student-details {
+          padding: 15px;
+        }
+        .cyber-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      @media print {
+        body {
+          background: white;
+          color: black;
+        }
+        .cover-page,
+        .card,
+        .student-details {
+          background: white;
+          border: 1px solid #ddd;
+          box-shadow: none;
+        }
+        h1,
+        h2,
+        h3,
+        a {
+          color: black;
+          text-shadow: none;
+        }
+        .terminal {
+          background: #f0f0f0;
+          color: black;
+          border: 1px solid #ccc;
+        }
+        .progress-bar-container,
+        .back-to-top,
+        video {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body style="">
+    <!-- Scroll Progress -->
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Cover Page -->
+    <section class="cover-page" id="home">
+      <div class="project-badge">
+        <i class="fas fa-shield-halved"></i>
+      </div>
+
+      <div class="institution-box"><i class="fas fa-university"></i> QNAYDS ACADEMY</div>
+
+      <h1 class="cover-title">DOCKER AND SPLUNK<br>INSTALLATION &amp; LOG ANALYSIS</h1>
+      <p style="
+          color: var(--accent-green);
+          font-size: 1.2rem;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          margin-bottom: 2rem;
+        ">
+        Cyber Security Project Report
+      </p>
+
+      <div class="student-details">
+        <div class="detail-row">
+          <span class="detail-label">Submitted By</span>
+          <span class="detail-value">Muhammed Khan</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Project Guide</span>
+          <span class="detail-value">Alen Jolly</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Course</span>
+          <span class="detail-value">Certified Penetration Tester (CPT)</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Department</span>
+          <span class="detail-value">Cyber Security</span>
+        </div>
+        <div class="detail-row" style="border-bottom: none">
+          <span class="detail-label">Submission Date</span>
+          <span class="detail-value">05-04-2026</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <a href="https://drive.google.com/file/d/1TFha3mN2PQpWRfDFKOiyXQ1DmTPeF8gQ/view?usp=drive_link" target="_blank" class="cyber-btn primary">
+          <i class="fas fa-play-circle"></i> Watch Project Demo
+        </a>
+        <a href="https://www.linkedin.com/in/muhammed-khan-a57498375?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" class="cyber-btn">
+          <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+        <a href="http://github.com/muhammed95rafi-arch" target="_blank" class="cyber-btn">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="/cdn-cgi/l/email-protection#563b233e373b3b33326f632437303f16313b373f3a7835393b" class="cyber-btn"> <i class="fas fa-envelope"></i> Email </a>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+      <div class="container">
+        <!-- Table of Contents -->
+        <div class="card" id="toc">
+          <h2><i class="fas fa-list-ul"></i> Table of Contents</h2>
+          <ul class="toc-list">
+            <li><a href="#abstract">Abstract</a></li>
+            <li><a href="#intro">Introduction</a></li>
+            <li><a href="#docker">Docker Installation</a></li>
+            <li><a href="#splunk">Splunk Installation</a></li>
+            <li><a href="#integration">Docker &amp; Splunk Integration</a></li>
+            <li><a href="#logging">Log File Saving</a></li>
+            <li><a href="#reading">Log File Reading &amp; Analysis</a></li>
+            <li><a href="#conclusion">Conclusion</a></li>
+          </ul>
+        </div>
+
+        <!-- Abstract -->
+        <section id="abstract" class="card">
+          <h2>Abstract</h2>
+          <p>
+            This project demonstrates the deployment of a centralized log management solution using Splunk Enterprise
+            and Docker technology. It covers the end-to-end process of installing Docker on a Linux environment,
+            deploying Splunk within a containerized environment, and configuring log file ingestion. The project further
+            explores the practical application of Splunk's Search Processing Language (SPL) to read, analyze, and
+            visualize system logs for cybersecurity monitoring purposes.
+          </p>
+        </section>
+
+        <!-- Introduction -->
+        <section id="intro" class="card">
+          <h2>Introduction</h2>
+          <p>
+            In the realm of modern cybersecurity, visibility is paramount. Organizations generate massive amounts of
+            machine data daily. Two critical technologies that facilitate the management and analysis of this data are
+            Docker and Splunk.
+          </p>
+          <br>
+          <h3><i class="fab fa-docker"></i> Docker</h3>
+          <p>
+            Docker is an open-source platform that enables developers to build, deploy, run, update, and manage
+            containers—standardized, executable components that combine application source code with the operating
+            system (OS) libraries and dependencies required to run that code in any environment.
+          </p>
+          <br>
+          <h3><i class="fas fa-chart-line"></i> Splunk</h3>
+          <p>
+            Splunk is a powerful platform for searching, monitoring, and analyzing machine-generated big data via a
+            Web-style interface. It captures, indexes, and correlates real-time data in a searchable repository from
+            which it can generate graphs, reports, alerts, dashboards, and visualizations.
+          </p>
+        </section>
+
+        <!-- Docker Installation -->
+        <section id="docker" class="card">
+          <h2>Docker Installation</h2>
+          <p>The following steps outline the installation of Docker on an Ubuntu Linux system.</p>
+
+          <h3>1. Update System Repositories</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">sudo apt update</div>
+            <div class="cmd">sudo apt upgrade -y</div>
+          </div>
+
+          <h3>2. Install Docker</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">sudo apt install docker.io -y</div>
+          </div>
+
+          <h3>3. Start and Enable Docker Service</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">sudo systemctl start docker</div>
+            <div class="cmd">sudo systemctl enable docker</div>
+            <div class="comment"># Verify status</div>
+            <div class="cmd">sudo systemctl status docker</div>
+          </div>
+
+          <div class="screenshot-box">
+            <i class="fab fa-docker screenshot-icon" style="color: #0db7ed"></i>
+            <h4>Docker Verification Screenshot</h4>
+            <p>Shows output of 'docker --version' and active status</p>
+          </div>
+        </section>
+
+        <!-- Splunk Installation -->
+        <section id="splunk" class="card">
+          <h2>Splunk Installation</h2>
+
+          <h3>1. Download Splunk Enterprise</h3>
+          <p>Download the .deb package from the official Splunk website (requires account creation).</p>
+
+          <h3>2. Install Package</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">cd Downloads/</div>
+            <div class="cmd">sudo dpkg -i splunk-9.0.0-linux-amd64.deb</div>
+          </div>
+
+          <h3>3. Start Splunk and Accept License</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">sudo /opt/splunk/bin/splunk start --accept-license</div>
+          </div>
+
+          <p>During this step, you will be prompted to create an administrator username and password.</p>
+
+          <div class="screenshot-box">
+            <i class="fas fa-terminal screenshot-icon" style="color: var(--accent-green)"></i>
+            <h4>Splunk Start Screenshot</h4>
+            <p>Shows 'The Splunk web interface is available at http://hostname:8000'</p>
+          </div>
+        </section>
+
+        <!-- Integration -->
+        <section id="integration" class="card">
+          <h2>Docker + Splunk Integration</h2>
+          <p>
+            Running Splunk inside a Docker container is a cleaner, more efficient method for testing and development
+            environments.
+          </p>
+
+          <h3>1. Pull Splunk Image</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">sudo docker pull splunk/splunk:latest</div>
+          </div>
+
+          <h3>2. Run Splunk Container</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <div class="cmd">
+              sudo docker run -d -p 8000:8000 -e "SPLUNK_START_ARGS=--accept-license" -e "SPLUNK_PASSWORD=password123"
+              --name splunk splunk/splunk:latest
+            </div>
+          </div>
+
+          <p>This command maps port 8000 (Web UI) and sets the admin password.</p>
+
+          <div class="screenshot-box">
+            <i class="fas fa-network-wired screenshot-icon" style="color: var(--accent-cyan)"></i>
+            <h4>Container Status Screenshot</h4>
+            <p>Output of 'docker ps' showing running Splunk container</p>
+          </div>
+        </section>
+
+        <!-- Log File Saving -->
+        <section id="logging" class="card">
+          <h2>Log File Saving</h2>
+          <p>
+            To analyze data, we must first ingest logs into Splunk. We configured Splunk to monitor a specific local
+            directory.
+          </p>
+
+          <h3>1. Access Web Interface</h3>
+          <p>Open browser and navigate to <code>http://localhost:8000</code>. Login with created credentials.</p>
+
+          <h3>2. Add Data Input</h3>
+          <ul>
+            <li>Go to <strong>Settings</strong> &gt; <strong>Add Data</strong>.</li>
+            <li>Select <strong>Monitor</strong> &gt; <strong>Files &amp; Directories</strong>.</li>
+            <li>Browse and select the system log file: <code>/var/log/syslog</code> (or any target log file).</li>
+          </ul>
+
+          <h3>3. Configure Source Type</h3>
+          <p>
+            Splunk automatically detects the format, but for custom logs, we can define line breaking and timestamps in
+            <code>props.conf</code>.
+          </p>
+
+          <div class="screenshot-box">
+            <i class="fas fa-file-import screenshot-icon" style="color: #f7be16"></i>
+            <h4>Data Input Configuration</h4>
+            <p>Screenshot of Splunk Web UI 'Add Data' wizard</p>
+          </div>
+        </section>
+
+        <!-- Log Reading -->
+        <section id="reading" class="card">
+          <h2>Log File Reading &amp; Analysis</h2>
+          <p>Once data is indexed, we use the Search &amp; Reporting app to query the logs.</p>
+
+          <h3>1. Basic Search</h3>
+          <div class="terminal">
+            <div class="terminal-header">SPL Query</div>
+            <div class="cmd" style="color: white">index="main" source="/var/log/syslog" | head 20</div>
+          </div>
+
+          <h3>2. Filtering for Errors</h3>
+          <p>Finding failed login attempts or error messages:</p>
+          <div class="terminal">
+            <div class="terminal-header">SPL Query</div>
+            <div class="cmd" style="color: white">index="main" "error" OR "failed" | stats count by _time</div>
+          </div>
+
+          <h3>3. Visualization</h3>
+          <p>We created a dashboard panel to visualize the frequency of log events over time.</p>
+
+          <div class="screenshot-box">
+            <i class="fas fa-chart-bar screenshot-icon" style="color: var(--accent-green)"></i>
+            <h4>Splunk Dashboard Screenshot</h4>
+            <p>Visual representation of log analysis results</p>
+          </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section id="conclusion" class="card">
+          <h2>Conclusion</h2>
+          <p>
+            This project successfully demonstrated the deployment of a robust log management infrastructure using Docker
+            and Splunk. By containerizing the Splunk instance, we achieved a portable and isolated environment suitable
+            for security testing. The successful ingestion and querying of log files prove the efficacy of this setup
+            for identifying security incidents and operational issues within a network environment.
+          </p>
+        </section>
+
+        <!-- References -->
+        <section id="references" class="card">
+          <h2>References</h2>
+          <ul>
+            <li><a href="https://docs.docker.com/" target="_blank">Docker Official Documentation</a></li>
+            <li>
+              <a href="https://docs.splunk.com/Documentation/Splunk" target="_blank">Splunk Enterprise Documentation</a>
+            </li>
+            <li><a href="https://hub.docker.com/r/splunk/splunk" target="_blank">Splunk Docker Hub Repository</a></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <h2 style="font-size: 1.5rem; margin-bottom: 20px">Contact Information</h2>
+        <div class="btn-group">
+          <a href="https://www.linkedin.com/in/muhammed-khan-a57498375" target="_blank" class="cyber-btn"><i class="fab fa-linkedin"></i> LinkedIn</a>
+          <a href="http://github.com/muhammed95rafi-arch" target="_blank" class="cyber-btn"><i class="fab fa-github"></i> GitHub</a>
+          <a href="/cdn-cgi/l/email-protection#523f273a333f3f37366b672033343b12353f333b3e7c313d3f" class="cyber-btn"><i class="fas fa-envelope"></i> Email</a>
+        </div>
+        <p style="margin-top: 30px; color: #666">© 2026 Muhammed Khan | Cyber Security Department | QNAYDS Academy</p>
+      </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <a href="#home" class="back-to-top" title="Back to Top">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+      // Scroll Progress Bar
+      window.onscroll = function () {
+        myFunction();
+      };
+
+      function myFunction() {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById('progressBar').style.width = scrolled + '%';
+      }
+    </script>
+  
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body></html>
